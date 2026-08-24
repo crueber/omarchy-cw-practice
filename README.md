@@ -5,6 +5,8 @@ practicing Morse code (CW) copy. Sends random characters as an audio sidetone
 and reveals what was sent only after a selectable delay — so you copy by ear
 first, then check yourself.
 
+![CW Practice panel](preview.png)
+
 ## Features
 
 - **Start/Pause** — one button; the bar pill lights up while a run is active.
