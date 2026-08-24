@@ -25,6 +25,31 @@ first, then check yourself.
   received characters; already-queued characters keep the delay they were
   received with.
 
+## Installation
+
+```
+omarchy plugin add https://github.com/crueber/omarchy-cw-practice.git
+```
+
+Then enable it on the bar (if it is not placed automatically):
+
+```
+omarchy plugin enable crueber.cwpractice
+```
+
+The "CW" pill appears in the bar after the shell reloads.
+
+## Removal
+
+```
+omarchy plugin remove crueber.cwpractice
+```
+
+Or delete `~/.config/omarchy/plugins/crueber.cwpractice/` and remove the
+widget from your bar layout in `~/.config/omarchy/shell.json`, then restart
+the shell (`omarchy restart shell`). Optionally also delete
+`~/.local/state/omarchy/cwpractice/` (persisted settings).
+
 ## How it works
 
 `Panel.qml` runs `cw_player.py` as a long-lived child process. The player
