@@ -55,6 +55,13 @@ BarWidget {
     }
   }
 
+  // State-changing IPC (start/stop/set) is disabled by default: any local
+  // process able to reach the IPC target could otherwise start audio or
+  // change persisted settings without a panel interaction. Opt in per the
+  // README with "allowIpcControl": true in the widget's shell.json entry.
+  readonly property bool ipcControlAllowed: panelLoader.item
+    ? panelLoader.item.ipcControlAllowed === true : false
+
   IpcHandler {
     target: "crueber.cwpractice"
 
@@ -63,12 +70,25 @@ BarWidget {
     function show(): void { root.open() }
     function hide(): void { root.close() }
     function toggle(): void { root.togglePanel() }
-    function start(): void { if (panelLoader.item) panelLoader.item.play() }
-    function stop(): void { if (panelLoader.item) panelLoader.item.pause() }
+
+    function start(): string {
+      if (!root.ipcControlAllowed) return "disabled: set allowIpcControl in shell.json"
+      if (panelLoader.item) panelLoader.item.play()
+      return "ok"
+    }
+
+    function stop(): string {
+      if (!root.ipcControlAllowed) return "disabled: set allowIpcControl in shell.json"
+      if (panelLoader.item) panelLoader.item.pause()
+      return "ok"
+    }
+
     // set <key> <value> — keys: wpm, delay, tone, volume, word-gaps, pool.
     // Applied live (next character) when a practice run is active.
-    function set(key: string, value: string): bool {
-      return panelLoader.item ? panelLoader.item.applySetting(key, value) : false
+    function set(key: string, value: string): string {
+      if (!root.ipcControlAllowed) return "disabled: set allowIpcControl in shell.json"
+      if (!panelLoader.item) return "panel not ready"
+      return panelLoader.item.applySetting(key, value) ? "ok" : "unknown key: " + key
     }
 
     function history(): string {

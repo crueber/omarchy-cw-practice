@@ -27,6 +27,14 @@ Panel {
   function toggle() { if (root.opened) root.close(); else root.openFromHotkey() }
 
   readonly property color fg: bar ? bar.foreground : Color.foreground
+
+  // Opt-in gate for state-changing IPC (see BarWidget.qml). Default off.
+  // `omarchy bar set` stores inline settings as strings, so accept both
+  // boolean true and the string "true".
+  readonly property bool ipcControlAllowed: {
+    var v = setting("allowIpcControl", false)
+    return v === true || v === "true"
+  }
   readonly property string fontFam: bar ? bar.fontFamily : Style.font.family
 
   // ---- persisted state ----

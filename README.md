@@ -73,13 +73,23 @@ size-bounded, symlink- and FIFO-safe `dd` process; written atomically via
 
 ## IPC
 
-The plugin registers IPC functions:
+The plugin registers IPC functions. Opening the panel and reading the
+history are always available; the state-changing functions are **disabled by
+default** so no local process can start audio or change settings without a
+panel interaction:
 
 ```
 omarchy-shell crueber.cwpractice open     # open the panel
+omarchy-shell crueber.cwpractice history  # print revealed characters
+```
+
+To opt in to scripting (e.g. from keybindings or another widget), add
+`"allowIpcControl": true` to the widget entry in `~/.config/omarchy/shell.json`
+(or run `omarchy bar set crueber.cwpractice allowIpcControl true`):
+
+```
 omarchy-shell crueber.cwpractice start    # start practice
 omarchy-shell crueber.cwpractice stop     # pause practice
-omarchy-shell crueber.cwpractice history  # print revealed characters
 omarchy-shell crueber.cwpractice set wpm 25           # live-set a value
 omarchy-shell crueber.cwpractice set pool ABC123     # live-set the pool
 omarchy-shell crueber.cwpractice set delay 2000      # reveal delay (ms)
