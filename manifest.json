@@ -1,0 +1,22 @@
+{
+  "schemaVersion": 1,
+  "id": "crueber.cwpractice",
+  "name": "CW Practice",
+  "version": "1.0.0",
+  "author": "Christopher Rueber",
+  "license": "MIT",
+  "description": "Morse code (CW) receiving practice: random characters at a chosen WPM with a delayed-reveal history.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "CW Practice",
+    "description": "Practice receiving Morse code with delayed character reveal",
+    "category": "Education",
+    "allowMultiple": false,
+    "defaultSection": "center"
+  }
+}
