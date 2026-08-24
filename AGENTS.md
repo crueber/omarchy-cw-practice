@@ -75,8 +75,9 @@ set `textFormat: Text.PlainText`.
   restarting the player. The reveal delay is panel-side only.
 - The player paces itself against wall-clock playback time so `pacat`'s
   buffering can't make it outrun the audio.
-- The history string and reveal queue are bounded (`MAX_HISTORY`); keep
-  every new code path bounded the same way.
+- `historyText` is capped at `MAX_HISTORY`. The reveal queue is bounded
+  naturally (delay × send rate); if you add an unbounded producer, cap it
+  explicitly the same way.
 
 ## Testing
 

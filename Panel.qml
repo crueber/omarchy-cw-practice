@@ -150,7 +150,10 @@ Panel {
       liveWpm = wpm
       pushSetting("wpm", wpm)
     } else if (key === "delay") {
-      delayMs = Model.clampInt(n, 0, Model.MAX_DELAY, delayMs)
+      // Snap to the documented 0.5 s steps — PanelSlider only applies
+      // `step` to wheel events, not drags.
+      delayMs = Math.round(Model.clampInt(n, 0, Model.MAX_DELAY, delayMs)
+        / Model.DELAY_STEP) * Model.DELAY_STEP
       liveDelayMs = delayMs
     } else if (key === "tone") {
       toneHz = Model.clampInt(n, Model.MIN_TONE, Model.MAX_TONE, toneHz)
@@ -166,6 +169,12 @@ Panel {
     } else if (key === "pool") {
       enabledChars = Model.sanitizeChars(String(value).split(""))
       pushPool()
+      // The player rejects an empty pool and keeps its previous one; make
+      // that divergence visible instead of silently sending stale audio.
+      if (player.running && enabledChars.length === 0)
+        errorMessage = "No characters selected — still sending the previous set"
+      else if (enabledChars.length > 0)
+        errorMessage = ""
     } else {
       return false
     }
@@ -271,7 +280,21 @@ Panel {
   Timer {
     id: restartTimer
     interval: 250
-    onTriggered: if (root.wantRunning && !root.player.running) root.launchPlayer()
+    property int attempts: 0
+    onTriggered: {
+      if (root.wantRunning && !root.player.running) {
+        attempts = 0
+        root.launchPlayer()
+      } else if (root.wantRunning && attempts < 20) {
+        // Old player hasn't fully exited yet — wait and retry (5 s total)
+        // before giving up, so a stalled exit can't wedge the run silently.
+        attempts += 1
+        restart()
+      } else if (root.wantRunning) {
+        root.wantRunning = false
+        root.errorMessage = "Could not restart audio — try again"
+      }
+    }
   }
 
   Timer {
@@ -504,7 +527,7 @@ Panel {
           maximum: Model.MAX_DELAY
           step: Model.DELAY_STEP
           valueText: Model.delayLabel(root.liveDelayMs)
-          onMoved: function(v) { root.liveDelayMs = Math.round(v); root.delayMs = Math.round(v) }
+          onMoved: function(v) { root.delayMs = Math.round(v / Model.DELAY_STEP) * Model.DELAY_STEP; root.liveDelayMs = root.delayMs }
           onReleased: function(v) { root.applySetting("delay", Math.round(v)) }
         }
 

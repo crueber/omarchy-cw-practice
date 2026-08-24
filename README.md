@@ -11,18 +11,19 @@ first, then check yourself.
 - **Character selection** — letters, numbers, and punctuation as toggleable
   grids (with All/None per group).
 - **Speed** — 5–40 WPM, single-slider PARIS timing (dit = 1.2/WPM seconds).
-- **Reveal delay** — 0–5 s in 0.5 s steps. Characters appear in the history
-  only after the delay, so you're not relying on instantly seeing them.
+- **Reveal delay** — 0–5 s in 0.5 s steps (snapped). Characters appear in
+  the history only after the delay, so you're not relying on instantly
+  seeing them.
 - **History** — received characters wrap across the panel width; spaces mark
   word gaps. Clearable.
 - **Word gaps** — toggleable: occasionally a 7-dit pause and a space, like
   words in real text.
 - **Sidetone** — 400–800 Hz tone and volume sliders.
-- **Persistent settings** — everything survives shell restarts.
 - **Live settings** — speed, tone, volume, word gaps, and character
   selection changes apply on the next character while a run is active
-  (no restart, no gap in the audio). The reveal delay applies immediately
-  to characters not yet shown.
+  (no restart, no gap in the audio). Reveal-delay changes apply to newly
+  received characters; already-queued characters keep the delay they were
+  received with.
 
 ## How it works
 
@@ -35,7 +36,7 @@ configured delay.
 While a run is active, settings changes are sent to the player over stdin as
 `SET key=value` lines (wpm, tone, volume, pool, word-gaps); the player applies
 them at the next character boundary, so the audio never restarts. Delay
-changes are panel-side and apply immediately to unrevealed characters.
+changes are panel-side and apply to newly received characters.
 
 ## State
 

@@ -205,11 +205,15 @@ def main():
     signal.signal(signal.SIGINT, shutdown)
 
     # Live settings: read stdin line by line, apply at the next boundary.
-    # EOF means the parent shell is gone — end the session. sys.exit() in a
-    # non-main thread only ends the thread, so signal the main one instead.
+    # A malformed line is reported and skipped — the reader must survive so
+    # the EOF watchdog below keeps working. sys.exit() in a non-main thread
+    # only ends the thread, so EOF signals the main thread instead.
     def reader():
         for line in sys.stdin:
-            err = cfg.apply(line)
+            try:
+                err = cfg.apply(line)
+            except ValueError as e:
+                err = "invalid value: %s" % e
             if err:
                 sys.stderr.write("settings error: %s\n" % err)
                 sys.stderr.flush()
@@ -243,7 +247,8 @@ def main():
             pattern = MORSE[ch]
             boundary = word_gaps and word_left == 0
             parts = []
-            if leading:
+            had_leading = leading
+            if had_leading:
                 parts.append(blocks.leading)
                 leading = False
             for i, el in enumerate(pattern):
@@ -256,7 +261,10 @@ def main():
             else:
                 word_left -= 1
 
-            dur = LEADING_SILENCE if leading else 0.0
+            # Full audio duration of what we're about to write, including
+            # the leading silence on the first character — the print clock
+            # must never run ahead of true playback.
+            dur = LEADING_SILENCE if had_leading else 0.0
 
             try:
                 sink.stdin.write(b"".join(parts))
@@ -270,9 +278,8 @@ def main():
                 if i > 0:
                     dur += dit
                 dur += dit if el == "." else 3 * dit
-            dur += 7 * dit if boundary else 3 * dit
-            leading = False
 
+            dur += 7 * dit if boundary else 3 * dit
             sent += dur
             pace(t0 + sent)
             sys.stdout.write(ch + (" " if boundary else "") + "\n")
